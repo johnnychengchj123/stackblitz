@@ -20,11 +20,11 @@ const store = {
   remove(key: string) {},
   clear() {}
 };
-export const localStorage = Object.assign(store, localStorageApi);
+export const localStorage = localStorageApi;
 console.log('localStorage111', localStorage);
 
-export const sessionStorage = Object.assign(store, sessionStorageApi);
-export const cookieStorage = Object.assign(store, cookieStorageApi);
-export const nativeStorage = Object.assign(store, nativeStorageApi);
+export const sessionStorage = sessionStorageApi;
+export const cookieStorage = cookieStorageApi;
+export const nativeStorage = nativeStorageApi;
 
 export default sessionStorage;
