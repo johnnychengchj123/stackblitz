@@ -2,101 +2,141 @@
  * 本地存储实现,封装localStorage
  */
 export interface OptionsProps {
-  expires?: Date;
+  expires?: Date
+}
+
+export interface clearStorageProps {
+  key: string
+  // eslint-disable-next-line no-unused-vars
+  success?: () => {} // 失败回调
+}
+
+export interface getStorageProps {
+  key: string
+  // eslint-disable-next-line no-unused-vars
+  success?: (result: any) => {} // 失败回调
+  // eslint-disable-next-line no-unused-vars
+  fail?: (err: any) => {} // 失败回调
+}
+
+export interface setStorageProps {
+  key: string
+  value: any
+  // eslint-disable-next-line no-unused-vars
+  success?: (result: any) => {} // 失败回调
+  // eslint-disable-next-line no-unused-vars
+  fail?: (err: any) => {} // 失败回调
+  expires?: Date
+  level?: number // 存储级别，Interger类型，0 - 内存【默认】，1 - 设备，2 - 云端【11】
+}
+
+export interface nativeStorageProps {
+  level?: number // 存储级别，Interger类型，0 - 内存【默认】，1 - 设备，2 - 云端【11】
+  // eslint-disable-next-line no-unused-vars
+  fail?: (key: string, err: any) => {} // 失败回调
+  expires?: Date
 }
 
 export function serialize(val: object) {
-  return JSON.stringify(val);
+  return JSON.stringify(val)
 }
 
 export function deserialize(val: object) {
   if (typeof val !== 'string') {
-    return undefined;
+    return undefined
   }
   try {
-    return JSON.parse(val);
+    return JSON.parse(val)
   } catch (e) {
-    return val || undefined;
+    return val || undefined
   }
 }
 
 const localStorage = {
   storage: window.localStorage,
-  disabled: false,
-  set(key: string, value: any, options: OptionsProps = {}): any {
-    let val = value;
+  setStorage(params: setStorageProps): any {
+    const { key, value, expires, success, fail } = params
+    let val = value
 
-    if (!key || this.disabled) {
-      return;
+    if (!key) {
+      if (fail) {
+        fail('key为必传值')
+      }
+      return Promise.reject()
     }
+
     if (val === undefined) {
-      this.remove(key);
-      return;
+      this.clearStorage({ key })
+      if (success) {
+        success(undefined)
+      }
+      return Promise.resolve()
     }
-    const { expires } = options;
 
     if (expires) {
       val = {
         value,
         expires,
-        timestamp: +new Date()
-      };
+        timestamp: +new Date(),
+      }
     }
-    this.storage.setItem(key, serialize(val));
+    this.storage.setItem(key, serialize(val))
 
+    if (success) {
+      success(value)
+    }
     // eslint-disable-next-line consistent-return
-    return val;
+    return Promise.resolve(val)
   },
 
-  get(key: string, def?: any): any {
+  getStorage(params: getStorageProps): any {
+    const { key, success } = params
     if (!key || this.disabled) {
-      return def;
+      return undefined
     }
-    let value = deserialize(this.storage.getItem(key));
+    let value = deserialize(this.storage.getItem(key))
 
     if (value && value.expires) {
       // 值已经过期
       if (value.timestamp + value.expires * 1000 < new Date()) {
-        this.remove(key);
-        value = '';
+        this.clearStorage({ key })
+        value = ''
       } else {
         // 值没有过期
-        value = value.value;
+        value = value.value
       }
     }
-    return value === undefined ? def : value;
+
+    if (success) {
+      success(value)
+    }
+
+    return Promise.resolve(value)
   },
 
   has(key: string) {
-    if (!key || this.disabled) {
-      return false;
+    if (!key) {
+      return false
     }
-    return this.get(key) !== undefined;
+    return Promise.resolve(this.getStorage({ key }) !== undefined)
   },
 
-  remove(key: string) {
-    if (!key || this.disabled) {
-      return;
+  clearStorage(params: clearStorageProps) {
+    const { key, success } = params
+
+    if (!key) {
+      return
     }
-    this.storage.removeItem(key);
+
+    if (success) {
+      success()
+    }
+    this.storage.removeItem(key)
   },
 
-  clear() {
-    if (this.disabled) {
-      return;
-    }
-    this.storage.clear();
-  }
-};
-// 测试是否方法可用，不可用直接disabled
-try {
-  const testKey = '__storejs__';
-  localStorage.set(testKey, testKey);
-  if (localStorage.get(testKey) !== testKey) {
-    localStorage.disabled = true;
-  }
-  localStorage.remove(testKey);
-} catch (e) {
-  localStorage.disabled = true;
+  clearAllStorage() {
+    this.storage.clearAllStorage()
+  },
 }
-export default localStorage;
+
+export default localStorage

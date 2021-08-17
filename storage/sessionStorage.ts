@@ -1,87 +1,106 @@
-import localStorageTools, { OptionsProps } from './localStorage';
+import localStorageTools, { getStorageProps, setStorageProps, clearStorageProps } from './localStorage'
 
-const inBrowser = typeof window !== 'undefined';
+const inBrowser = typeof window !== 'undefined'
 
 const virtualStorage = {
   storage: {},
-  disabled: false,
-  set(key: string, value: any, options: OptionsProps = {}): any {
-    let val = value;
+  setStorage(params: setStorageProps): any {
+    const { key, value, expires, success, fail } = params
+    let val = value
 
-    if (!key || this.disabled) {
-      return;
+    if (!key) {
+      if (fail) {
+        fail('key为必传值')
+      }
+      return Promise.reject()
     }
+
     if (val === undefined) {
-      this.remove(key);
-      return;
+      this.clearStorage({ key })
+      if (success) {
+        success(undefined)
+      }
+      return Promise.resolve()
     }
-    const { expires } = options;
 
     if (expires) {
       val = {
         value,
         expires,
-        timestamp: +new Date()
-      };
+        timestamp: +new Date(),
+      }
     }
-    this.storage[key] = val;
+    this.storage[key] = val
+
+    if (success) {
+      success(value)
+    }
     // eslint-disable-next-line consistent-return
-    return val;
+    return Promise.resolve(val)
   },
 
-  get(key: string, def?: any): any {
-    if (!key || this.disabled) {
-      return def;
+  getStorage(params: getStorageProps): any {
+    const { key, success } = params
+
+    if (!key) {
+      return undefined
     }
-    let val;
-    const target = this.storage;
+    let val
+    const target = this.storage
     // eslint-disable-next-line no-prototype-builtins
     if (target.hasOwnProperty(key)) {
-      val = target[key];
+      val = target[key]
     }
     if (val && val.expires) {
       // 值已经过期
       if (val.timestamp + val.expires * 1000 < new Date()) {
-        this.remove(key);
-        val = '';
+        this.clearStorage({ key })
+        val = ''
       } else {
         // 值没有过期
-        val = val.value;
+        val = val.value
       }
     }
-    return val === undefined ? def : val;
+
+    if (success) {
+      success(val)
+    }
+    return Promise.resolve(val)
   },
 
   has(key: string) {
-    if (!key || this.disabled) {
-      return false;
+    if (!key) {
+      return false
     }
     // eslint-disable-next-line no-prototype-builtins
-    return this.storage.hasOwnProperty(key);
+    return Promise.resolve(this.storage.hasOwnProperty(key))
   },
 
-  remove(key: string) {
-    if (!key || this.disabled) {
-      return;
+  clearStorage(params: clearStorageProps) {
+    const { key, success } = params
+
+    if (!key) {
+      return
     }
-    const target = this.storage;
+    const target = this.storage
     // eslint-disable-next-line no-prototype-builtins
     if (target.hasOwnProperty(key)) {
-      delete target[key];
+      delete target[key]
+    }
+
+    if (success) {
+      success()
     }
   },
 
-  clear() {
-    if (this.disabled) {
-      return;
-    }
-    this.storage = {};
-  }
-};
+  clearAllStorage() {
+    this.storage = {}
+  },
+}
 
-export default (inBrowser
+export default inBrowser
   ? {
       ...localStorageTools,
-      storage: window.sessionStorage
+      storage: window.sessionStorage,
     }
-  : virtualStorage);
+  : virtualStorage

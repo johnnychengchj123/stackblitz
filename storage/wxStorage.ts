@@ -1,100 +1,120 @@
-import { OptionsProps } from './localStorage';
+import { getStorageProps, setStorageProps, clearStorageProps } from './localStorage'
 
-const canUseWxSDK = typeof window !== 'undefined' && (window as any).wx;
+const canUseWxSDK = typeof window !== 'undefined' && (window as any).wx
 
 const store = {
   storage: (window as any).wx || {},
-  disabled: false,
-  set(key: string, val: any, options: OptionsProps = {}): any {
-    let value = val;
-    if (!key || this.disabled || !canUseWxSDK) {
-      return;
+  setStorage(params: setStorageProps): any {
+    const { key, value, expires, success, fail } = params
+    let val = value
+
+    if (!key || !canUseWxSDK) {
+      if (fail) {
+        fail('key为必传值')
+      }
+      return Promise.reject()
     }
-    if (value === undefined) {
-      this.remove(key);
-      return;
+
+    if (val === undefined) {
+      this.clearStorage({ key })
+      if (success) {
+        success(undefined)
+      }
+      return Promise.resolve()
     }
-    const { expires } = options;
 
     if (expires) {
-      value = {
+      val = {
         value,
         expires,
-        timestamp: +new Date()
-      };
+        timestamp: +new Date(),
+      }
     }
+
     try {
-      this.storage.setStorageSync(key, value);
+      this.storage.setStorageSync(key, val)
+      if (success) {
+        success(value)
+      }
+      // eslint-disable-next-line consistent-return
+      return Promise.resolve(val)
     } catch (e) {
-      // continue regardless of error
+      if (fail) {
+        fail(e)
+      }
+      // eslint-disable-next-line consistent-return
+      return Promise.reject(e)
     }
-    // eslint-disable-next-line consistent-return
-    return value;
   },
 
-  get(key: string, def?: any): any {
-    if (!key || this.disabled || !canUseWxSDK) {
-      return;
+  getStorage(params: getStorageProps): any {
+    const { key, success, fail } = params
+
+    if (!key || !canUseWxSDK) {
+      return
     }
-    let value = null;
+    let value = null
     try {
-      value = this.storage.getStorageSync(key);
+      value = this.storage.getStorageSync(key)
       if (value && value.expires) {
         // 值已经过期
         if (value.timestamp + value.expires * 1000 < new Date()) {
-          this.remove(key);
-          value = '';
+          this.clearStorage({ key })
+          value = ''
         } else {
           // 值没有过期
-          value = value.value;
+          value = value.value
         }
+      }
+      if (success) {
+        success(value)
       }
     } catch (e) {
       // continue regardless of error
+      if (fail) {
+        fail(value)
+      }
     }
+
     // eslint-disable-next-line consistent-return
-    return value || def;
+    return Promise.resolve(value)
   },
 
   has(key: string) {
-    if (!key || this.disabled || !canUseWxSDK) {
-      return false;
+    if (!key || !canUseWxSDK) {
+      return false
     }
-    const val = this.get(key);
-    return !!val;
+    const val = this.getStorage({ key })
+    return Promise.resolve(!!val)
   },
 
-  remove(key: string) {
-    if (!key || this.disabled || !canUseWxSDK) {
-      return;
+  clearStorage(params: clearStorageProps) {
+    const { key, success } = params
+
+    if (!key || !canUseWxSDK) {
+      return
     }
     try {
-      this.storage.removeStorageSync(key);
+      this.storage.removeStorageSync(key)
+    } catch (e) {
+      // continue regardless of error
+    }
+
+    if (success) {
+      success()
+    }
+  },
+
+  clearAllStorage() {
+    if (!canUseWxSDK) {
+      return
+    }
+    try {
+      this.storage.clearStorageSync()
     } catch (e) {
       // continue regardless of error
     }
   },
-
-  clear() {
-    if (this.disabled || !canUseWxSDK) {
-      return;
-    }
-    try {
-      this.storage.clearStorageSync();
-    } catch (e) {
-      // continue regardless of error
-    }
-  }
-};
-// 测试是否方法可用，不可用直接disabled
-try {
-  const testKey = '__storejs__';
-  store.set(testKey, testKey);
-  if (store.get(testKey) !== testKey) {
-    store.disabled = true;
-  }
-  store.remove(testKey);
-} catch (e) {
-  store.disabled = true;
 }
-export default store;
+
+export default store
