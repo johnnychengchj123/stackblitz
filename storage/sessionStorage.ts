@@ -1,87 +1,86 @@
-import { OptionsProps } from './localStorage'
+import localStorageTools, { OptionsProps } from './localStorage';
 
-const inBrowser = typeof window === 'undefined'
-const localStorageTools = import('./localStorage')
+const inBrowser = typeof window !== 'undefined';
 
 const virtualStorage = {
   storage: {},
   disabled: false,
   set(key: string, value: any, options: OptionsProps = {}): any {
-    let val = value
+    let val = value;
 
     if (!key || this.disabled) {
-      return
+      return;
     }
     if (val === undefined) {
-      this.remove(key)
-      return
+      this.remove(key);
+      return;
     }
-    const { expires } = options
+    const { expires } = options;
 
     if (expires) {
       val = {
         value,
         expires,
-        timestamp: +new Date(),
-      }
+        timestamp: +new Date()
+      };
     }
-    this.storage[key] = val
+    this.storage[key] = val;
     // eslint-disable-next-line consistent-return
-    return val
+    return val;
   },
 
   get(key: string, def?: any): any {
     if (!key || this.disabled) {
-      return def
+      return def;
     }
-    let val
-    const target = this.storage
+    let val;
+    const target = this.storage;
     // eslint-disable-next-line no-prototype-builtins
     if (target.hasOwnProperty(key)) {
-      val = target[key]
+      val = target[key];
     }
     if (val && val.expires) {
       // 值已经过期
       if (val.timestamp + val.expires * 1000 < new Date()) {
-        this.remove(key)
-        val = ''
+        this.remove(key);
+        val = '';
       } else {
         // 值没有过期
-        val = val.value
+        val = val.value;
       }
     }
-    return val === undefined ? def : val
+    return val === undefined ? def : val;
   },
 
   has(key: string) {
     if (!key || this.disabled) {
-      return false
+      return false;
     }
     // eslint-disable-next-line no-prototype-builtins
-    return this.storage.hasOwnProperty(key)
+    return this.storage.hasOwnProperty(key);
   },
 
   remove(key: string) {
     if (!key || this.disabled) {
-      return
+      return;
     }
-    const target = this.storage
+    const target = this.storage;
     // eslint-disable-next-line no-prototype-builtins
     if (target.hasOwnProperty(key)) {
-      delete target[key]
+      delete target[key];
     }
   },
 
   clear() {
     if (this.disabled) {
-      return
+      return;
     }
-    this.storage = {}
-  },
-}
+    this.storage = {};
+  }
+};
 
-export default inBrowser
+export default (inBrowser
   ? Object.assign(localStorageTools, {
-      storage: window.sessionStorage,
+      storage: window.sessionStorage
     })
-  : virtualStorage
+  : virtualStorage);
