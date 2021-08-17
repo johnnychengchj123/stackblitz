@@ -80,7 +80,8 @@ const virtualStorage = {
 };
 
 export default (inBrowser
-  ? Object.assign(localStorageTools, {
+  ? {
+      ...localStorageTools,
       storage: window.sessionStorage
-    })
+    }
   : virtualStorage);

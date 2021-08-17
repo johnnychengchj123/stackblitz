@@ -1,11 +1,11 @@
 /**
  * 本地存储实现,封装localStorage和sessionStorage
  */
-import localStorageApi from './localStorage'
-import sessionStorageApi from './sessionStorage'
-import cookieStorageApi from './cookieStorage'
-import nativeStorageApi from './nativeStorage'
- 
+import localStorageApi from './localStorage';
+import sessionStorageApi from './sessionStorage';
+import cookieStorageApi from './cookieStorage';
+import nativeStorageApi from './nativeStorage';
+
 const store = {
   /* eslint-disable no-undef */
   version: '1.1.1',
@@ -21,8 +21,6 @@ const store = {
   clear() {}
 };
 export const localStorage = localStorageApi;
-console.log('localStorage111', localStorage);
-
 export const sessionStorage = sessionStorageApi;
 export const cookieStorage = cookieStorageApi;
 export const nativeStorage = nativeStorageApi;
