@@ -1,12 +1,14 @@
 // Import stylesheets
 import './style.css';
-import { localStorage } from './storage/index';
+import { sessionStorage } from './storage/index';
 
 // Write TypeScript code!
 const appDiv: HTMLElement = document.getElementById('app');
 
 function testStorage() {
-  const stoarge = localStorage;
+  const stoarge = sessionStorage;
+  console.log('stoarge11', stoarge);
+
   stoarge.set('string', 'string');
   stoarge.set('boolean', true);
   stoarge.set('number', 11);
@@ -34,7 +36,7 @@ function testStorage() {
 
   // clear
   setTimeout(() => {
-    // stoarge.clear();
+    stoarge.clear();
   }, 5000);
 }
 

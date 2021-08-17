@@ -24,7 +24,6 @@ const localStorage = {
   storage: window.localStorage,
   disabled: false,
   set(key: string, value: any, options: OptionsProps = {}): any {
-    console.log('key', key);
     let val = value;
 
     if (!key || this.disabled) {
@@ -43,10 +42,7 @@ const localStorage = {
         timestamp: +new Date()
       };
     }
-    console.log('key', key);
-    console.log('serialize(val)', serialize(val));
-
-    window.localStorage.setItem(key, serialize(val));
+    this.storage.setItem(key, serialize(val));
 
     // eslint-disable-next-line consistent-return
     return val;
