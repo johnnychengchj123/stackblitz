@@ -1,110 +1,120 @@
-import { OptionsProps } from './localStorage'
+import { OptionsProps } from './localStorage';
 
 function decode(s: string) {
-  return s.replace(/(%[0-9A-Z]{2})+/g, decodeURIComponent)
+  return s.replace(/(%[0-9A-Z]{2})+/g, decodeURIComponent);
 }
 
 const store = {
   storage: document.cookie,
   disabled: false,
-  set(key: string, value: string, options: OptionsProps = {}): any {
+  set(key: string, value: any, options: OptionsProps = {}): any {
     if (!key || this.disabled) {
-      return
+      return;
     }
     if (value === undefined) {
-      this.remove(key)
-      return
+      this.remove(key);
+      return;
     }
-    const { expires } = options
-    let expiresStr = this.get('expires')
+    const { expires } = options;
+    let expiresStr = this.get('expires');
     if (expires instanceof Date) {
-      expiresStr = expires.toUTCString()
+      expiresStr = expires.toUTCString();
     }
-    const domain = window.location.host.substr(window.location.host.indexOf('.'))
-    this.storage = `${key}=${escape(value)}; path=/; domain=${domain};  expires=${expiresStr}`
+    const domain = window.location.host.substr(
+      window.location.host.indexOf('.')
+    );
+    console.log(`${key}=${escape(value)}`);
+    document.cookie = `${key}=${escape(
+      value
+    )}; path=/; domain=${domain};  expires=${expiresStr}`;
+    console.log(`document.cookie----${JSON.stringify(document.cookie)}`);
   },
 
   get(key: string, def?: any): any {
     if (!key || this.disabled) {
-      return
+      return;
     }
-    const jar = {} as any
-    const cookies = this.storage ? this.storage.split('; ') : []
+    const jar = {} as any;
+    const cookies = document.cookie ? document.cookie.split('; ') : [];
     for (let i = 0; i < cookies.length; i += 1) {
-      const parts = cookies[i].split('=')
-      let cookie = parts.slice(1).join('=')
+      const parts = cookies[i].split('=');
+      let cookie = parts.slice(1).join('=');
 
       if (cookie.charAt(0) === '"') {
-        cookie = cookie.slice(1, -1)
+        cookie = cookie.slice(1, -1);
       }
 
       try {
-        const name = decode(parts[0])
-        cookie = decode(cookie)
-        jar[name] = cookie
+        const name = decode(parts[0]);
+        cookie = decode(cookie);
+        jar[name] = cookie;
         if (key === name) {
-          break
+          break;
         }
       } catch (e) {
-        console.log(e)
+        console.log(e);
       }
     }
 
     // eslint-disable-next-line consistent-return
-    return jar[key] || def
+    return jar[key] || def;
   },
 
   has(key: string) {
     if (this.disabled) {
-      return false
+      return false;
     }
-    const val = this.get(key)
-    return !!val
+    const val = this.get(key);
+    return !!val;
   },
 
   remove(key: string) {
     if (this.disabled) {
-      return
+      return;
     }
-    const expires = new Date()
-    expires.setTime(expires.getTime() - 1)
-    const domain = window.location.host.substr(window.location.host.indexOf('.'))
-    this.storage = `${key}=; expires=${expires.toGMTString()}; domain=${domain}; path=/`
+    const expires = new Date();
+    expires.setTime(expires.getTime() - 1);
+    const domain = window.location.host.substr(
+      window.location.host.indexOf('.')
+    );
+    document.cookie = `${key}=; expires=${expires.toUTCString()}; domain=${domain}; path=/`;
   },
 
   clear() {
     if (this.disabled) {
-      return
+      return;
     }
-    const cookies = this.storage.split(';')
+    const cookies = document.cookie.split(';');
     for (let i = 0; i < cookies.length; i += 1) {
-      const cookie = cookies[i]
-      const eqPos = cookie.indexOf('=')
-      const name = eqPos > -1 ? cookie.substr(0, eqPos) : cookie
-      this.storage = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/`
+      const cookie = cookies[i];
+      const eqPos = cookie.indexOf('=');
+      const name = eqPos > -1 ? cookie.substr(0, eqPos) : cookie;
+      document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/`;
     }
 
     if (cookies.length > 0) {
       for (let i = 0; i < cookies.length; i += 1) {
-        const cookie = cookies[i]
-        const eqPos = cookie.indexOf('=')
-        const name = eqPos > -1 ? cookie.substr(0, eqPos) : cookie
-        const domain = window.location.host.substr(window.location.host.indexOf('.'))
-        this.storage = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/; domain=${domain}`
+        const cookie = cookies[i];
+        const eqPos = cookie.indexOf('=');
+        const name = eqPos > -1 ? cookie.substr(0, eqPos) : cookie;
+        const domain = window.location.host.substr(
+          window.location.host.indexOf('.')
+        );
+        document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/; domain=${domain}`;
       }
     }
-  },
-}
+  }
+};
 
 // 测试是否方法可用，不可用直接disabled
 try {
-  const testKey = '__storejs__'
-  store.set(testKey, testKey)
+  const testKey = '__storejs__';
+  store.set(testKey, testKey);
   if (store.get(testKey) !== testKey) {
-    store.disabled = true
+    store.disabled = true;
   }
-  store.remove(testKey)
+  store.remove(testKey);
 } catch (e) {
-  store.disabled = true
+  store.disabled = true;
 }
-export default store
+export default store;

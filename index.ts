@@ -1,12 +1,12 @@
 // Import stylesheets
 import './style.css';
-import { sessionStorage } from './storage/index';
+import { cookieStorage } from './storage/index';
 
 // Write TypeScript code!
 const appDiv: HTMLElement = document.getElementById('app');
 
 function testStorage() {
-  const stoarge = sessionStorage;
+  const stoarge = cookieStorage;
   console.log('stoarge11', stoarge);
 
   stoarge.set('string', 'string');
