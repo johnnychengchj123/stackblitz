@@ -127,9 +127,6 @@ const localStorage = {
     this.storage.removeItem(key)
   },
 
-  clearAllStorage() {
-    this.storage.clearAllStorage()
-  },
 }
 
 export default localStorage

@@ -97,16 +97,6 @@ const store = {
     }
   },
 
-  clearAllStorage() {
-    if (!canUseWxSDK) {
-      return
-    }
-    try {
-      this.storage.clearStorageSync()
-    } catch (e) {
-      // continue regardless of error
-    }
-  },
 }
 
 export default store

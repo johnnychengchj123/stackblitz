@@ -86,11 +86,6 @@ function testStorage() {
       key: 'object'
     });
   }, 2000);
-
-  // clear
-  setTimeout(() => {
-    stoarge.clearAllStorage();
-  }, 5000);
 }
 
 appDiv.innerHTML = `<h1>TypeScript Starter

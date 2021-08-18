@@ -105,17 +105,6 @@ const store = {
     })
   },
 
-  clearAllStorage(key: string) {
-    if (isPC) {
-      localStorageTools.clearAllStorage()
-      return
-    }
-    if (key) {
-      this.clearStorage(key)
-    } else {
-      console.error('native环境无法清空客户端存储的数据')
-    }
-  },
 }
 
 export default store
