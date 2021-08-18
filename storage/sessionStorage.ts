@@ -68,14 +68,6 @@ const virtualStorage = {
     return Promise.resolve(val)
   },
 
-  has(key: string) {
-    if (!key) {
-      return false
-    }
-    // eslint-disable-next-line no-prototype-builtins
-    return Promise.resolve(this.storage.hasOwnProperty(key))
-  },
-
   clearStorage(params: clearStorageProps) {
     const { key, success } = params
 

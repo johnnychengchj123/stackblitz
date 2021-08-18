@@ -14,18 +14,18 @@ export interface clearStorageProps {
 export interface getStorageProps {
   key: string
   // eslint-disable-next-line no-unused-vars
-  success?: (result: any) => {} // 失败回调
+  success?: Function // 失败回调
   // eslint-disable-next-line no-unused-vars
-  fail?: (err: any) => {} // 失败回调
+  fail?: Function // 失败回调
 }
 
 export interface setStorageProps {
   key: string
   value: any
   // eslint-disable-next-line no-unused-vars
-  success?: (result: any) => {} // 失败回调
+  success?: Function // 失败回调 
   // eslint-disable-next-line no-unused-vars
-  fail?: (err: any) => {} // 失败回调
+  fail?: Function // 失败回调
   expires?: Date
   level?: number // 存储级别，Interger类型，0 - 内存【默认】，1 - 设备，2 - 云端【11】
 }
@@ -33,7 +33,7 @@ export interface setStorageProps {
 export interface nativeStorageProps {
   level?: number // 存储级别，Interger类型，0 - 内存【默认】，1 - 设备，2 - 云端【11】
   // eslint-disable-next-line no-unused-vars
-  fail?: (key: string, err: any) => {} // 失败回调
+  fail?: Function // 失败回调
   expires?: Date
 }
 
@@ -112,13 +112,6 @@ const localStorage = {
     }
 
     return Promise.resolve(value)
-  },
-
-  has(key: string) {
-    if (!key) {
-      return false
-    }
-    return Promise.resolve(this.getStorage({ key }) !== undefined)
   },
 
   clearStorage(params: clearStorageProps) {

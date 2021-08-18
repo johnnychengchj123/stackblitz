@@ -80,14 +80,6 @@ const store = {
     return Promise.resolve(value)
   },
 
-  has(key: string) {
-    if (!key || !canUseWxSDK) {
-      return false
-    }
-    const val = this.getStorage({ key })
-    return Promise.resolve(!!val)
-  },
-
   clearStorage(params: clearStorageProps) {
     const { key, success } = params
 

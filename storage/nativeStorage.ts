@@ -92,18 +92,6 @@ const store = {
     })
   },
 
-  async has(key: string) {
-    if (!key) {
-      return false
-    }
-    if (isPC) {
-      return localStorageTools.getStorage({ key })
-    }
-    const val = await this.getStorage({ key })
-
-    return val
-  },
-
   clearStorage(key: string) {
     if (!key) {
       return

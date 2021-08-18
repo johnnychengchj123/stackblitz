@@ -71,11 +71,6 @@ const store = {
     return Promise.resolve(jar[key])
   },
 
-  has(key: string) {
-    const val = this.getStorage({ key })
-    return Promise.resolve(!!val)
-  },
-
   clearStorage(params: clearStorageProps) {
     const { key, success } = params
     const expires = new Date()

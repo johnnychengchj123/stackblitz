@@ -1,42 +1,95 @@
 // Import stylesheets
 import './style.css';
-import { cookieStorage } from './storage/index';
+import { localStorage } from './storage/index';
 
 // Write TypeScript code!
 const appDiv: HTMLElement = document.getElementById('app');
 
 function testStorage() {
-  const stoarge = cookieStorage;
+  const stoarge = localStorage;
   console.log('stoarge11', stoarge);
 
-  stoarge.set('string', 'string');
-  stoarge.set('boolean', true);
-  stoarge.set('number', 11);
-  stoarge.set('null', null);
-  stoarge.set('undefined', undefined);
-  stoarge.set('array', ['a', 'b']);
-  stoarge.set('object', { a: 1 });
-
-  console.log(`string-${stoarge.get('string')}`);
-  console.log(`boolean-${stoarge.get('boolean')}`);
-  console.log(`number-${stoarge.get('number')}`);
-  console.log(`null-${stoarge.get('null')}`);
-  console.log(`undefined-${stoarge.get('undefined')}`);
-  console.log(`array-${JSON.stringify(stoarge.get('array'))}`);
-  console.log(`object-${JSON.stringify(stoarge.get('object'))}`);
-
-  // has
-  console.log(`has-${stoarge.has('object')}`);
-  console.log(`no-has-${stoarge.has('object1')}`);
-
+  stoarge.setStorage({
+    key: 'string',
+    value: 'string'
+  });
+  stoarge.setStorage({
+    key: 'boolean',
+    value: true
+  });
+  stoarge.setStorage({
+    key: 'number',
+    value: 11
+  });
+  stoarge.setStorage({
+    key: 'null',
+    value: null
+  });
+  stoarge.setStorage({
+    key: 'undefined',
+    value: undefined
+  });
+  stoarge.setStorage({
+    key: 'array',
+    value: ['a', 'b']
+  });
+  stoarge.setStorage({
+    key: 'object',
+    value: { a: 1 }
+  });
+  // get
+  stoarge.getStorage({
+    key: 'string',
+    success: (result) => {
+      return console.log('string: ', result);
+    }
+  })
+  stoarge.getStorage({
+    key: 'boolean',
+    success: (result) => {
+      return console.log('boolean: ', result);
+    }
+  })
+  stoarge.getStorage({
+    key: 'number',
+    success: (result) => {
+      return console.log('number: ', result);
+    }
+  })
+  stoarge.getStorage({
+    key: 'null',
+    success: (result) => {
+      return console.log('null: ', result);
+    }
+  })
+  stoarge.getStorage({
+    key: 'undefined',
+    success: (result) => {
+      return console.log('undefined: ', result);
+    }
+  })
+  stoarge.getStorage({
+    key: 'array',
+    success: (result) => {
+      return console.log('array: ', result);
+    }
+  })
+  stoarge.getStorage({
+    key: 'object',
+    success: (result) => {
+      return console.log('object: ', result);
+    }
+  })
   // remove
   setTimeout(() => {
-    stoarge.remove('object');
+    stoarge.clearStorage({
+      key: 'object'
+    });
   }, 2000);
 
   // clear
   setTimeout(() => {
-    stoarge.clear();
+    stoarge.clearAllStorage();
   }, 5000);
 }
 
