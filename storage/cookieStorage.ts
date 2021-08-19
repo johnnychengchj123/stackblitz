@@ -1,88 +1,87 @@
-import { getStorageProps, setStorageProps, clearStorageProps } from './localStorage'
-
-function decode(s: string) {
-  return s.replace(/(%[0-9A-Z]{2})+/g, decodeURIComponent)
-}
+import {
+  getStorageProps,
+  setStorageProps,
+  clearStorageProps
+} from './localStorage';
 
 const store = {
   storage: document.cookie,
   setStorage(params: setStorageProps): any {
-    const { key, value, expires, success, fail } = params
+    const { key, value, expires, success, fail } = params;
 
     if (!key) {
       if (fail) {
-        fail('key为必传值')
+        fail('key为必传值');
       }
-      return Promise.reject()
+      return Promise.reject();
     }
 
     if (value === undefined) {
-      this.clearStorage({ key })
+      this.clearStorage({ key });
       if (success) {
-        success(undefined)
+        success(undefined);
       }
-      return Promise.resolve()
+      return Promise.resolve();
     }
-    let expiresStr = this.getStorage({ key: 'expires' })
+    let expiresStr = this.getStorage({ key: 'expires' });
     if (expires instanceof Date) {
-      expiresStr = expires.toUTCString()
+      expiresStr = expires.toUTCString();
     }
-    const domain = window.location.host.substr(window.location.host.indexOf('.'))
-    document.cookie = `${key}=${escape(value)}; path=/; domain=${domain};  ${expires && `expires=${expiresStr}`}`
+    document.cookie = `${key}=${encodeURIComponent(
+      JSON.stringify(value) || ''
+    )}; path=/; ${expires && `expires=${expiresStr}`}`;
+    console.log(
+      `document.cookie = ${`${key}=${encodeURIComponent(
+        JSON.stringify(value) || ''
+      )}; path=/; ${expires && `expires=${expiresStr}`}`}`
+    );
     if (success) {
-      success(value)
+      success(value);
     }
     // eslint-disable-next-line consistent-return
-    return Promise.resolve(value)
+    return Promise.resolve(value);
   },
 
   getStorage(params: getStorageProps): any {
-    const { key, success } = params
+    const { key, success } = params;
 
     if (!key) {
-      return
+      return;
     }
-    const jar = {} as any
-    const cookies = document.cookie ? document.cookie.split('; ') : []
-    for (let i = 0; i < cookies.length; i += 1) {
-      const parts = cookies[i].split('=')
-      let cookie = parts.slice(1).join('=')
+    const name = key + '=';
+    const cookies = document.cookie.split(';');
 
-      if (cookie.charAt(0) === '"') {
-        cookie = cookie.slice(1, -1)
-      }
-
-      try {
-        const name = decode(parts[0])
-        cookie = decode(cookie)
-        jar[name] = cookie
-        if (key === name) {
-          break
+    for (const cookie of cookies) {
+      const cookieStr = cookie.trim();
+      if (cookieStr.indexOf(name) === 0) {
+        const val = decodeURIComponent(
+          cookieStr.substring(name.length, cookieStr.length)
+        );
+        if (success) {
+          success(JSON.parse(val));
         }
-      } catch (e) {
-        console.log(e)
+        return Promise.resolve(JSON.parse(val));
       }
-    }
-    if (success) {
-      success(jar[key])
     }
 
     // eslint-disable-next-line consistent-return
-    return Promise.resolve(jar[key])
+    return Promise.resolve('');
   },
 
   clearStorage(params: clearStorageProps) {
-    const { key, success } = params
-    const expires = new Date()
-    expires.setTime(expires.getTime() - 1)
-    const domain = window.location.host.substr(window.location.host.indexOf('.'))
-    document.cookie = `${key}=; expires=${expires.toGMTString()}; domain=${domain}; path=/`
+    const { key, success } = params;
+
+    if (typeof key !== 'string' || !key.length) {
+      return;
+    }
+    const expires = new Date();
+    expires.setTime(expires.getTime() - 1);
+    document.cookie = `${key}=; expires=${expires.toUTCString()}; path=/`;
 
     if (success) {
-      success()
+      success();
     }
-  },
+  }
+};
 
-}
-
-export default store
+export default store;
